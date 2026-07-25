@@ -30,8 +30,9 @@ class ResearchRunRequest(BaseModel):
 
 def _service() -> ResearchWorkflowService:
     try:
-        if os.getenv("AUTONOMOUS_LOCAL_MODE", "").lower() in {"1", "true", "yes"} or os.getenv("AUTONOMOUS_IN_MEMORY_STORAGE", "").lower() in {"1", "true", "yes"}:
+        if os.getenv("AUTONOMOUS_IN_MEMORY_STORAGE", "").lower() in {"1", "true", "yes"}:
             return ResearchWorkflowService(_local_repository)
+        
         return ResearchWorkflowService(SupabaseWorkflowRepository())
     except RuntimeError as exc:
         logger.warning(
