@@ -278,11 +278,36 @@
       .card { padding: 16px; }
       .stats-grid { grid-template-columns: repeat(2, 1fr); }
     }
+    /* SaaS dashboard refresh */
+    :root { --navy:#0B0F19; --cyan:#06B6D4; --canvas:#F8FAFC; --line:#E5E7EB; }
+    html { scroll-behavior:smooth; } body { background:var(--canvas); color:#111827; letter-spacing:-.01em; }
+    .site-nav { height:68px; background:rgba(255,255,255,.94); backdrop-filter:blur(14px); border-bottom:1px solid var(--line); position:sticky; top:0; z-index:20; }
+    .nav-inner { max-width:1180px; height:100%; padding:0 24px; margin:auto; display:flex; align-items:center; justify-content:space-between; gap:20px; }
+    .brand { font-size:.95rem; font-weight:750; color:var(--navy); text-decoration:none; }.brand b{color:var(--cyan);margin-right:8px}.nav-links{display:flex;gap:20px;align-items:center}.nav-links a{text-decoration:none;color:#64748B;font-size:.84rem;font-weight:600}.nav-links a:hover{color:#0891B2}.nav-links .nav-github{padding:8px 12px;border:1px solid #CBD5E1;border-radius:8px;color:var(--navy)}
+    header { background:radial-gradient(circle at 80% 10%, #164e63 0, transparent 36%),var(--navy); border-radius:0; margin:0; padding:72px 0 84px; text-align:left; } header .container,.container{max-width:1180px}header h1{max-width:720px;font-size:clamp(2.3rem,5vw,4.1rem);line-height:1.05;letter-spacing:-.055em}header p{max-width:680px;color:#CBD5E1;opacity:1;font-size:1.06rem;line-height:1.7}header h1:not(.hero-title),header p:not(.hero-copy){display:none}.eyebrow{color:#67E8F9;text-transform:uppercase;letter-spacing:.13em;font-size:.7rem;font-weight:750;margin-bottom:15px}.hero-actions{display:flex;gap:12px;margin-top:25px}.hero-actions .btn-primary{background:var(--cyan);color:#083344}.hero-actions .btn-outline{color:#E0F2FE;border-color:#334155}
+    .container{padding:32px 24px}.card{border:1px solid var(--line);box-shadow:0 12px 28px rgba(15,23,42,.05);border-radius:16px;padding:28px}.card-title{border:0;padding:0;font-size:1.05rem}.card-title .badge{background:#F1F5F9}.form-grid{display:grid;grid-template-columns:1.35fr .65fr;gap:24px}.form-aside{background:#F8FAFC;border:1px solid #E2E8F0;border-radius:13px;padding:18px}.form-aside h3{font-size:.9rem;margin-bottom:7px}.form-aside p{font-size:.8rem;color:#64748B;margin-bottom:14px}textarea,input[type="text"],select{width:100%;border:1px solid #CBD5E1;background:#fff;border-radius:10px;padding:11px 12px;font:inherit;color:#0F172A;margin-bottom:14px}textarea:focus,input[type="text"]:focus,select:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(6,182,212,.13)}label{color:#475569;font-weight:650;font-size:.8rem}
+    .agent-list{gap:12px}.agent-row{display:grid;grid-template-columns:42px 1fr auto;gap:13px;align-items:center;padding:16px;border:1px solid #E2E8F0;background:#fff!important;color:#334155!important;border-radius:12px}.agent-row.running{border-color:#67E8F9;box-shadow:0 5px 18px rgba(6,182,212,.12)}.agent-row.completed{border-left:3px solid #22C55E}.agent-row.failed{border-left:3px solid #EF4444}.agent-icon{width:36px;height:36px;background:#F1F5F9!important;color:#0F172A!important;font-size:1rem}.agent-row.running .agent-icon{background:#083344!important;color:#67E8F9!important}.agent-copy strong{display:block;font-size:.9rem;color:#0F172A}.agent-copy small,.agent-activity{display:block;font-size:.76rem;color:#64748B;margin-top:2px}.agent-activity{color:#0891B2;margin-top:5px}.agent-status{margin:0;font-weight:700;font-size:.76rem}.agent-time{color:#64748B;font-size:.72rem;text-align:right;margin-top:3px}
+    .stat-card{border:1px solid #E2E8F0;background:#fff;border-radius:12px;text-align:left;padding:17px}.stat-value{color:#0F172A;font-size:1.45rem}.stat-label{text-align:left}.report-preview{border-color:#E2E8F0;background:#0F172A;color:#E2E8F0;border-radius:12px}.btn{border-radius:9px}.btn-primary{background:var(--navy)}.btn-primary:hover{background:#1E293B}.btn-success{background:#0F766E}@media(max-width:720px){.nav-links{display:none}.form-grid{grid-template-columns:1fr}.container{padding:22px 16px}header{padding:55px 0 64px}.card{padding:20px}}
+
+    /* LitSync academic palette */
+    :root { --maroon:#7C1D2A; --maroon-dark:#441019; --gold:#A9782E; --gold-pale:#FBF6E9; --gold-border:#E8D5AA; --bg:#F5F3EF; --surface:#FFFFFF; --text:#241E1B; --text2:#655C56; --text3:#918680; --border:#E4DED7; --border2:#CFC5BC; --success:#16A34A; --success-bg:#F0FDF4; --warning:#CA8A04; --warning-bg:#FEFCE8; --danger:#DC2626; --danger-bg:#FEF2F2; --navy:var(--maroon-dark); --cyan:var(--gold); --canvas:var(--bg); --line:var(--border); }
+    body { color:var(--text); } .site-nav{background:rgba(255,255,255,.94);border-color:var(--border)}.brand,.nav-links .nav-github{color:var(--maroon-dark)!important}.brand b{color:var(--gold)}.nav-links a{color:var(--text2)}.nav-links a:hover{color:var(--maroon)}.nav-links .nav-github{border-color:var(--border2)}
+    header{background:linear-gradient(105deg,#441019,#7C1D2A 60%,#97363E)}.eyebrow{color:#F6D88A}.hero-actions .btn-primary{background:var(--gold);color:#241E1B}.hero-actions .btn-outline{color:#FFF8E8;border-color:rgba(255,255,255,.35)}
+    .card{background:var(--surface);border-color:var(--border);box-shadow:0 12px 28px rgba(68,16,25,.05)}.card-title{color:var(--text)}.form-aside{background:var(--gold-pale);border-color:var(--gold-border)}label{color:var(--text2)}textarea,input[type="text"],select{border-color:var(--border2);color:var(--text);background:var(--surface)}textarea:focus,input[type="text"]:focus,select:focus{border-color:var(--maroon);box-shadow:0 0 0 3px rgba(124,29,42,.12)}
+    .btn-primary{background:var(--maroon)}.btn-primary:hover{background:var(--maroon-dark)}.btn-success{background:var(--success)}.btn-outline{color:var(--maroon);border-color:var(--maroon)}.btn-outline:hover{background:var(--maroon);color:#fff}.agent-row{border-color:var(--border);color:var(--text)!important}.agent-row.running{border-color:var(--gold-border);box-shadow:0 5px 18px rgba(124,29,42,.10)}.agent-row.running .agent-icon{background:var(--maroon-dark)!important;color:#F6D88A!important}.agent-copy strong,.stat-value{color:var(--text)}.agent-copy small,.agent-time{color:var(--text2)}.agent-activity{color:var(--maroon)}.stat-card{border-color:var(--border);background:var(--surface)}.report-preview{background:#241E1B;border-color:#441019;color:#FBF6E9}.progress-bar-fill{background:linear-gradient(90deg,var(--maroon),var(--gold))}.score-moderate{background:var(--warning-bg);color:var(--warning)}
+
+    /* Low-glare dark academic workspace */
+    :root { --bg:#211716; --surface:#2A1D1C; --text:#F7F0E8; --text2:#D4C4B8; --text3:#AB978B; --border:#4A3531; --border2:#60453F; --gold-pale:#382A20; --gold-border:#6E5432; --canvas:#211716; --line:#4A3531; }
+    body{background:radial-gradient(circle at 80% 0,rgba(124,29,42,.24),transparent 36%),var(--bg);color:var(--text)}.site-nav{background:rgba(33,23,22,.92);border-color:var(--border)}.brand,.nav-links .nav-github{color:#F7F0E8!important}.nav-links a{color:var(--text2)}.nav-links .nav-github{border-color:var(--border2)}
+    .card{background:var(--surface);border-color:var(--border);box-shadow:0 16px 34px rgba(0,0,0,.18)}.card-title{color:var(--text)}.card-title .badge{background:#382724;color:var(--text2)}.form-aside{background:#30231E;border-color:var(--gold-border)}.form-aside p,label{color:var(--text2)}textarea,input[type="text"],select{background:#211716;color:var(--text);border-color:var(--border2)}textarea::placeholder,input::placeholder{color:var(--text3)}
+    .agent-row{background:#2A1D1C!important;border-color:var(--border);color:var(--text)!important}.agent-icon{background:#382724!important;color:#F6D88A!important}.agent-copy strong,.stat-value{color:var(--text)}.agent-copy small,.agent-time,.stat-label{color:var(--text2)}.agent-activity{color:#E3BC68}.stat-card{background:#30211F;border-color:var(--border)}.report-preview{background:#191111;color:#F7F0E8}.progress-bar-bg{background:#3B2926}
   </style>
 </head>
 <body>
-  <header>
+  <nav class="site-nav"><div class="nav-inner"><a class="brand" href="#home"><b>◆</b>Autonomous SLR Research Assistant</a><div class="nav-links"><a href="#home">Home</a><a href="#workflow">Workflow</a><a href="#documentation">Documentation</a><a href="#team">Team</a><a class="nav-github" href="#github">GitHub</a></div></div></nav>
+  <header id="home">
     <div class="container">
+      <div class="eyebrow">Research intelligence, orchestrated</div><h1 class="hero-title">Autonomous Multi-Agent Research Assistant</h1><p class="hero-copy">An AI-powered Systematic Literature Review platform that autonomously searches, screens, analyzes and synthesizes scientific literature using collaborative AI agents.</p>
       <h1>🔬 Autonomous SLR Research Assistant</h1>
       <p>Multi-agent AI workflow for systematic literature reviews. The page shows the active source and never creates demo data in real-data mode.</p>
     </div>
@@ -295,6 +320,8 @@
       <form id="research-form">
         <label for="topic">Research topic *</label>
         <textarea id="topic" required minlength="3" rows="2" placeholder="e.g., Explainable AI in Healthcare, Blockchain for Supply Chain, ..."></textarea>
+        <div class="hero-actions"><button class="btn btn-primary" type="submit">New Research</button><button class="btn btn-outline" type="button" id="example-topics-btn">Example Topics</button></div>
+        <div class="form-grid"><div>
         <label for="paper-limit">Candidate papers to screen</label>
         <select id="paper-limit" required>
           <option value="100" selected>100 papers</option>
@@ -309,6 +336,7 @@
           <option value="40">40 studies</option>
           <option value="50">50 studies</option>
         </select>
+        </div><aside class="form-aside"><h3>Search configuration</h3><p>Configure the evidence pool and final review set.</p><label for="database">Preferred Databases</label><select id="database"><option value="openalex" selected>OpenAlex</option><option value="semantic_scholar">Semantic Scholar</option><option value="crossref">Crossref</option></select><div class="form-row"><div><label for="year-from">Publication year from</label><input id="year-from" type="text" inputmode="numeric" placeholder="2020"></div><div><label for="year-to">To</label><input id="year-to" type="text" inputmode="numeric" placeholder="2025"></div></div><p>Every decision is traceable in the CSV exports.</p></aside></div>
         <div class="form-row">
           <div>
             <label for="inclusion">Inclusion criteria (one per line)</label>
@@ -453,6 +481,10 @@
       const topicEl = document.getElementById('topic');
       const paperLimitEl = document.getElementById('paper-limit');
       const targetIncludedPapersEl = document.getElementById('target-included-papers');
+      const databaseEl = document.getElementById('database');
+      const yearFromEl = document.getElementById('year-from');
+      const yearToEl = document.getElementById('year-to');
+      const exampleTopicsBtn = document.getElementById('example-topics-btn');
       const inclusionEl = document.getElementById('inclusion');
       const exclusionEl = document.getElementById('exclusion');
       const startBtn = document.getElementById('start-btn');
@@ -489,6 +521,8 @@
 
       let currentRunId = null;
       let pollTimer = null;
+      let runStartedAt = null;
+      const AGENT_DETAILS = { planner:['Planner Agent','Analyzing your research objective and execution strategy.','Planning the review...'], query_generation:['Query Generation Agent','Building database-ready Boolean queries.','Generating queries...'], paper_search:['Paper Search Agent','Collecting candidate studies from scholarly sources.','Searching databases...'], paper_retrieval:['Paper Retrieval Agent','Retrieving evidence for selected studies.','Retrieving paper metadata...'], deduplication:['Deduplication Agent','Identifying duplicate records.','Removing duplicates...'], screening:['Screening Agent','Evaluating title and abstract evidence.','Screening candidate papers...'], data_extraction:['Data Extraction Agent','Extracting methods, findings and limitations.','Extracting structured evidence...'], quality_assessment:['Quality Assessment Agent','Assessing included study quality.','Assessing quality...'], evidence_synthesis:['Evidence Synthesis Agent','Identifying themes and research gaps.','Synthesizing evidence...'], validator:['Validator Agent','Verifying workflow outputs.','Validating results...'], report_generation:['Report Generation Agent','Preparing reports and exports.','Generating report...'] };
 
       // Helper: get lines from textarea
       function getLines(el) {
@@ -505,8 +539,8 @@
         agentList.innerHTML = AGENTS.map(id => `
           <div class="agent-row pending" data-agent="${id}">
             <div class="agent-icon">${AGENT_ICONS[id] || '○'}</div>
-            <span class="agent-name">${formatAgentName(id)}</span>
-            <span class="agent-status">Pending</span>
+            <div class="agent-copy"><strong>${AGENT_DETAILS[id]?.[0] || formatAgentName(id)}</strong><small>${AGENT_DETAILS[id]?.[1] || ''}</small><span class="agent-activity">Waiting to start</span></div>
+            <div><span class="agent-status">Pending</span><div class="agent-time">—</div></div>
           </div>
         `).join('');
       }
@@ -520,20 +554,27 @@
           const row = agentList.querySelector(`[data-agent="${id}"]`);
           if (!row) return;
           const statusEl = row.querySelector('.agent-status');
+          const activityEl = row.querySelector('.agent-activity');
+          const timeEl = row.querySelector('.agent-time');
           row.className = 'agent-row';
           if (failedSet.has(id)) {
             row.classList.add('failed');
             statusEl.textContent = 'Failed';
+            activityEl.textContent = 'Requires attention';
           } else if (completedSet.has(id)) {
             row.classList.add('completed');
             statusEl.textContent = 'Completed ✓';
+            activityEl.textContent = 'Completed successfully';
           } else if (id === current) {
             row.classList.add('running');
             statusEl.textContent = 'Running...';
+            activityEl.textContent = AGENT_DETAILS[id]?.[2] || 'Working...';
           } else {
             row.classList.add('pending');
             statusEl.textContent = 'Pending';
+            activityEl.textContent = 'Waiting to start';
           }
+          if (runStartedAt && (completedSet.has(id) || id === current)) timeEl.textContent = `${((Date.now() - runStartedAt) / 1000).toFixed(1)} sec`;
         });
       }
 
@@ -814,6 +855,7 @@
       // Start workflow
       async function startWorkflow(topic, inclusion, exclusion, paperLimit, targetIncludedPapers) {
         clearError();
+        runStartedAt = Date.now();
         startBtn.disabled = true;
         startBtn.textContent = '⏳ Starting...';
 
@@ -838,7 +880,10 @@
               inclusion_criteria: inclusion,
               exclusion_criteria: exclusion,
               paper_limit: paperLimit,
-              target_included_papers: targetIncludedPapers
+              target_included_papers: targetIncludedPapers,
+              preferred_databases: [databaseEl.value],
+              publication_year_from: Number(yearFromEl.value) || null,
+              publication_year_to: Number(yearToEl.value) || null
             })
           });
 
@@ -893,6 +938,7 @@
           form.dispatchEvent(new Event('submit'));
         }
       });
+      exampleTopicsBtn.addEventListener('click', () => { topicEl.value = 'Large Language Models for Software Engineering'; inclusionEl.value = 'Peer-reviewed\nExperimental evaluation\nPublished after 2020'; exclusionEl.value = 'Opinion papers\nNon-English'; topicEl.focus(); });
 
     })();
   </script>

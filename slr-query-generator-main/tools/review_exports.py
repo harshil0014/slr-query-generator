@@ -14,20 +14,29 @@ DECISION_COLUMNS = [
 ]
 
 
-def _value(paper: dict[str, Any], *keys: str) -> str:
+def _value(paper: dict[str, Any], *keys: str, missing: str = "Not available from source") -> str:
     for key in keys:
         value = paper.get(key)
         if value not in (None, ""):
             if isinstance(value, list):
                 return "; ".join(str(item) for item in value)
             return str(value)
-    return ""
+    return missing
 
 
 def _row(paper: dict[str, Any], index: int, state: dict[str, Any], contributions: dict[str, str]) -> dict[str, str]:
     title = _value(paper, "Title", "title")
     screening = (state.get("artifacts") or {}).get("screening") or {}
     required_evidence = "; ".join(str(item) for item in state.get("inclusion_criteria", []) if str(item).strip())
+    decision = _value(paper, "Decision", "decision", missing="UNSCREENED")
+    contribution = contributions.get(title.casefold())
+    if not contribution:
+        if decision.upper() == "REJECT":
+            contribution = "Not applicable: excluded before full-text extraction."
+        elif decision.upper() == "MAYBE":
+            contribution = "Pending manual review before evidence extraction."
+        else:
+            contribution = "Full text was not retrieved; contribution is not available."
     return {
         "Authors": _value(paper, "Authors", "authors"),
         "Title": title,
@@ -38,11 +47,11 @@ def _row(paper: dict[str, Any], index: int, state: dict[str, Any], contributions
         "Link": _value(paper, "Link", "url"),
         "Abstract": _value(paper, "Abstract", "abstract"),
         "Paper_ID": f"P{index:04d}",
-        "Decision": _value(paper, "Decision", "decision") or "UNSCREENED",
-        "Reason": _value(paper, "Reason", "reason") or "No screening reason recorded.",
-        "Confidence": _value(paper, "Confidence", "confidence") or "Not scored",
+        "Decision": decision,
+        "Reason": _value(paper, "Reason", "reason", missing="No screening reason recorded."),
+        "Confidence": _value(paper, "Confidence", "confidence", missing="Not scored"),
         "Required_Evidence": required_evidence or "Topic relevance and screening criteria",
-        "Paper_Contribution": contributions.get(title.casefold(), "Not extracted"),
+        "Paper_Contribution": contribution,
         "processing_engine": str(screening.get("engine") or "unknown"),
         "screening_strategy": "criteria_screening_then_relevance_ranking",
         "batch_number": str((index - 1) // 100 + 1),

@@ -37,16 +37,31 @@ class OpenAlexProvider:
     @staticmethod
     def _normalize(item: dict[str, Any]) -> dict[str, Any]:
         doi = item.get("doi") or ""
+        source = ((item.get("primary_location") or {}).get("source") or {}).get("display_name") or ""
         return {
             "provider": "openalex",
             "provider_id": item.get("id", ""),
             "title": item.get("display_name", ""),
             "doi": doi.replace("https://doi.org/", ""),
             "publication_year": item.get("publication_year"),
-            "abstract": "",
+            "abstract": OpenAlexProvider._abstract_text(item.get("abstract_inverted_index")),
             "url": item.get("doi") or item.get("id", ""),
             "authors": [author.get("author", {}).get("display_name", "") for author in item.get("authorships", [])],
+            "source": source,
+            "cited_by": item.get("cited_by_count", 0),
         }
+
+    @staticmethod
+    def _abstract_text(inverted_index: dict[str, list[int]] | None) -> str:
+        """Rebuild OpenAlex's compact inverted-index abstract representation."""
+        if not inverted_index:
+            return ""
+        positions = {
+            position: token
+            for token, offsets in inverted_index.items()
+            for position in offsets
+        }
+        return " ".join(positions[position] for position in sorted(positions))
 
 
 class SemanticScholarProvider:
@@ -56,7 +71,7 @@ class SemanticScholarProvider:
         def request() -> dict[str, Any]:
             response = httpx.get(
                 "https://api.semanticscholar.org/graph/v1/paper/search",
-                params={"query": query, "limit": min(limit, 100), "fields": "title,abstract,year,authors,externalIds,url"},
+                params={"query": query, "limit": min(limit, 100), "fields": "title,abstract,year,authors,externalIds,url,venue,citationCount"},
                 timeout=20.0,
             )
             response.raise_for_status()
@@ -73,6 +88,8 @@ class SemanticScholarProvider:
                 "abstract": item.get("abstract") or "",
                 "url": item.get("url", ""),
                 "authors": [author.get("name", "") for author in item.get("authors", [])],
+                "source": (item.get("venue") or ""),
+                "cited_by": item.get("citationCount", 0),
             }
             for item in payload.get("data", [])
         ]
@@ -107,6 +124,8 @@ class CrossrefProvider:
                 "abstract": item.get("abstract") or "",
                 "url": item.get("URL", ""),
                 "authors": [" ".join(filter(None, [author.get("given"), author.get("family")])) for author in item.get("author", [])],
+                "source": (item.get("container-title") or [""])[0],
+                "cited_by": item.get("is-referenced-by-count", 0),
             }
             for item in payload.get("message", {}).get("items", [])
         ]
