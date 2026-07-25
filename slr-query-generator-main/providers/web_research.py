@@ -73,12 +73,14 @@ class FirecrawlProvider:
                 "https://api.firecrawl.dev/v2/scrape",
                 headers={"Authorization": f"Bearer {api_key}"},
                 json={"url": url, "formats": ["markdown"], "onlyMainContent": True},
-                timeout=60.0,
+                timeout=float(os.getenv("FIRECRAWL_TIMEOUT_SECONDS", "20")),
             )
             response.raise_for_status()
             return response.json()
 
-        payload = retry(request)
+        # Full-text retrieval is optional enrichment. A single bounded attempt
+        # prevents one unreachable publisher page from blocking the workflow.
+        payload = retry(request, attempts=1)
         data = payload.get("data") or {}
         return {
             "provider": self.provider_id,
