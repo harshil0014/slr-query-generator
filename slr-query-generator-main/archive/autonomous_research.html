@@ -1,0 +1,891 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Autonomous SLR Research Assistant</title>
+  <style>
+    :root {
+      --primary: #3159d9;
+      --primary-light: #4a7af0;
+      --primary-dark: #1e3a8a;
+      --success: #117a43;
+      --success-bg: #e6f7ee;
+      --danger: #c0392b;
+      --danger-bg: #fdecea;
+      --warning: #b8860b;
+      --warning-bg: #fef9e7;
+      --muted: #6b7280;
+      --border: #d1d5db;
+      --bg: #f0f2f8;
+      --card-bg: #ffffff;
+      --text: #1f2937;
+      --text-light: #6b7280;
+      --radius: 12px;
+      --shadow: 0 2px 12px rgba(0,0,0,0.08);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+    .container { max-width: 960px; margin: 0 auto; padding: 24px 20px; }
+    header {
+      text-align: center;
+      padding: 32px 0 24px;
+      background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+      color: #fff;
+      border-radius: 0 0 var(--radius) var(--radius);
+      margin-bottom: 24px;
+    }
+    header h1 { font-size: 1.8rem; font-weight: 700; margin-bottom: 4px; }
+    header p { font-size: 0.95rem; opacity: 0.85; }
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      padding: 24px;
+      margin-bottom: 20px;
+      box-shadow: var(--shadow);
+    }
+    .card-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid var(--bg);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .card-title .badge {
+      font-size: 0.7rem;
+      font-weight: 500;
+      padding: 2px 8px;
+      border-radius: 10px;
+      background: var(--bg);
+      color: var(--text-light);
+      margin-left: auto;
+    }
+    label { display: block; font-weight: 500; font-size: 0.9rem; margin-bottom: 4px; color: var(--text-light); }
+    textarea, input[type="text"] {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font: inherit;
+      font-size: 0.95rem;
+      transition: border-color 0.2s;
+      margin-bottom: 12px;
+    }
+    textarea:focus, input[type="text"]:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(49,89,217,0.15); }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      font: inherit;
+      font-weight: 600;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-decoration: none;
+    }
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-primary:hover { background: var(--primary-light); transform: translateY(-1px); }
+    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+    .btn-success { background: var(--success); color: #fff; }
+    .btn-success:hover { background: #0f8b4e; }
+    .btn-outline { background: transparent; color: var(--primary); border: 2px solid var(--primary); }
+    .btn-outline:hover { background: var(--primary); color: #fff; }
+    .btn-block { width: 100%; justify-content: center; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    @media (max-width: 600px) { .form-row { grid-template-columns: 1fr; } }
+
+    /* Status bar */
+    #status-bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      border-radius: 8px;
+      font-weight: 500;
+      margin-bottom: 16px;
+    }
+    #status-bar.ready { background: var(--bg); color: var(--text-light); }
+    #status-bar.running { background: #e8f0fe; color: var(--primary); }
+    #status-bar.completed { background: var(--success-bg); color: var(--success); }
+    #status-bar.failed { background: var(--danger-bg); color: var(--danger); }
+    .spinner {
+      width: 18px; height: 18px;
+      border: 2px solid currentColor;
+      border-top-color: transparent;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      display: none;
+    }
+    #status-bar.running .spinner { display: inline-block; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Progress bar */
+    .progress-container { margin-bottom: 16px; }
+    .progress-bar-bg {
+      height: 8px;
+      background: var(--bg);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--primary), var(--primary-light));
+      border-radius: 4px;
+      transition: width 0.5s ease;
+      width: 0%;
+    }
+    .progress-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.8rem;
+      color: var(--text-light);
+      margin-top: 4px;
+    }
+
+    /* Agent list */
+    .agent-list { display: flex; flex-direction: column; gap: 4px; }
+    .agent-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      transition: all 0.3s;
+    }
+    .agent-row.pending { background: var(--bg); color: var(--text-light); }
+    .agent-row.running { background: #e8f0fe; color: var(--primary); font-weight: 600; }
+    .agent-row.completed { background: var(--success-bg); color: var(--success); }
+    .agent-row.failed { background: var(--danger-bg); color: var(--danger); }
+    .agent-icon {
+      width: 24px; height: 24px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .agent-row.pending .agent-icon { background: var(--bg); color: var(--text-light); }
+    .agent-row.running .agent-icon { background: var(--primary); color: #fff; animation: pulse 1.5s infinite; }
+    .agent-row.completed .agent-icon { background: var(--success); color: #fff; }
+    .agent-row.failed .agent-icon { background: var(--danger); color: #fff; }
+    @keyframes pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.1); } }
+    .agent-name { text-transform: capitalize; }
+    .agent-status { margin-left: auto; font-size: 0.8rem; }
+
+    /* Stats grid */
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px; }
+    .stat-card {
+      text-align: center;
+      padding: 16px 8px;
+      background: var(--bg);
+      border-radius: 8px;
+    }
+    .stat-value { font-size: 1.6rem; font-weight: 700; color: var(--primary); }
+    .stat-label { font-size: 0.75rem; color: var(--text-light); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px; }
+
+    /* QA table */
+    .qa-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+    .qa-table th {
+      text-align: left;
+      padding: 8px 10px;
+      background: var(--bg);
+      font-weight: 600;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+      color: var(--text-light);
+    }
+    .qa-table td { padding: 8px 10px; border-bottom: 1px solid var(--bg); }
+    .qa-table tr:hover td { background: #f8f9ff; }
+    .score-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 0.8rem;
+    }
+    .score-high { background: var(--success-bg); color: var(--success); }
+    .score-moderate { background: var(--warning-bg); color: var(--warning); }
+    .score-low { background: var(--danger-bg); color: var(--danger); }
+
+    /* Synthesis sections */
+    .synthesis-section { margin-bottom: 16px; }
+    .synthesis-section h4 {
+      font-size: 0.95rem;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: var(--primary-dark);
+    }
+    .synthesis-section p { font-size: 0.9rem; color: var(--text); line-height: 1.7; }
+    .synthesis-section ul { list-style: none; padding: 0; }
+    .synthesis-section li {
+      padding: 6px 10px;
+      margin-bottom: 4px;
+      background: var(--bg);
+      border-radius: 6px;
+      font-size: 0.9rem;
+    }
+    .synthesis-section li::before { content: "▸ "; color: var(--primary); font-weight: 700; }
+
+    /* Report preview */
+    .report-preview {
+      background: #fafbfc;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+      max-height: 400px;
+      overflow-y: auto;
+      font-family: 'Courier New', monospace;
+      font-size: 0.8rem;
+      line-height: 1.5;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    .report-preview:empty { display: none; }
+
+    /* Empty state */
+    .empty-state { text-align: center; padding: 32px 16px; color: var(--text-light); }
+    .empty-state .icon { font-size: 2.5rem; margin-bottom: 8px; }
+    .empty-state p { font-size: 0.9rem; }
+
+    /* Error */
+    .error-box {
+      background: var(--danger-bg);
+      color: var(--danger);
+      padding: 12px 16px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      margin-bottom: 12px;
+    }
+
+    /* Responsive */
+    @media (max-width: 600px) {
+      header h1 { font-size: 1.3rem; }
+      .card { padding: 16px; }
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <h1>🔬 Autonomous SLR Research Assistant</h1>
+      <p>Multi-agent AI workflow for systematic literature reviews. The page shows the active source and never creates demo data in real-data mode.</p>
+    </div>
+  </header>
+
+  <div class="container">
+    <!-- Input Form -->
+    <div class="card" id="form-card">
+      <div class="card-title">📋 New Research Review</div>
+      <form id="research-form">
+        <label for="topic">Research topic *</label>
+        <textarea id="topic" required minlength="3" rows="2" placeholder="e.g., Explainable AI in Healthcare, Blockchain for Supply Chain, ..."></textarea>
+        <label for="paper-limit">Candidate papers to screen</label>
+        <select id="paper-limit" required>
+          <option value="100" selected>100 papers</option>
+          <option value="250">250 papers</option>
+          <option value="500">500 papers</option>
+          <option value="1000">1000 papers</option>
+        </select>
+        <label for="target-included-papers">High-relevance studies to include</label>
+        <select id="target-included-papers" required>
+          <option value="25" selected>25 studies</option>
+          <option value="30">30 studies</option>
+          <option value="40">40 studies</option>
+          <option value="50">50 studies</option>
+        </select>
+        <div class="form-row">
+          <div>
+            <label for="inclusion">Inclusion criteria (one per line)</label>
+            <textarea id="inclusion" rows="3" placeholder="Peer-reviewed studies&#10;Published after 2018&#10;English language"></textarea>
+          </div>
+          <div>
+            <label for="exclusion">Exclusion criteria (one per line)</label>
+            <textarea id="exclusion" rows="3" placeholder="Opinion pieces&#10;Non-English&#10;Duplicate publications"></textarea>
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary btn-block" id="start-btn">
+          🚀 Start Autonomous Review
+        </button>
+      </form>
+    </div>
+
+    <!-- Workflow Progress -->
+    <div class="card" id="progress-card" style="display:none;">
+      <div class="card-title">
+        ⚡ Workflow Progress
+        <span class="badge" id="run-id-label"></span>
+      </div>
+
+      <div id="status-bar" class="ready">
+        <span class="spinner"></span>
+        <span id="status-text">Ready</span>
+      </div>
+
+      <div class="progress-container">
+        <div class="progress-bar-bg">
+          <div class="progress-bar-fill" id="progress-fill"></div>
+        </div>
+        <div class="progress-label">
+          <span id="progress-completed">0</span>
+          <span id="progress-total">0</span>
+        </div>
+      </div>
+
+      <div class="agent-list" id="agent-list"></div>
+    </div>
+
+    <!-- Statistics -->
+    <div class="card" id="stats-card" style="display:none;">
+      <div class="card-title">📊 Paper Statistics</div>
+      <div class="stats-grid" id="stats-grid">
+        <div class="stat-card"><div class="stat-value" id="stat-retrieved">-</div><div class="stat-label">Retrieved</div></div>
+        <div class="stat-card"><div class="stat-value" id="stat-screened">-</div><div class="stat-label">Screened</div></div>
+        <div class="stat-card"><div class="stat-value" id="stat-accepted">-</div><div class="stat-label">Accepted</div></div>
+        <div class="stat-card"><div class="stat-value" id="stat-rejected">-</div><div class="stat-label">Rejected</div></div>
+      </div>
+    </div>
+
+    <!-- Quality Assessment -->
+    <div class="card" id="qa-card" style="display:none;">
+      <div class="card-title">
+        📈 Quality Assessment
+        <span class="badge" id="qa-summary-badge"></span>
+      </div>
+      <div id="qa-content">
+        <div class="empty-state"><div class="icon">📊</div><p>Quality assessment results will appear here.</p></div>
+      </div>
+    </div>
+
+    <!-- Evidence Synthesis -->
+    <div class="card" id="synthesis-card" style="display:none;">
+      <div class="card-title">🧠 Evidence Synthesis</div>
+      <div id="synthesis-content">
+        <div class="empty-state"><div class="icon">🧠</div><p>Synthesis results will appear here.</p></div>
+      </div>
+    </div>
+
+    <!-- Report -->
+    <div class="card" id="report-card" style="display:none;">
+      <div class="card-title">
+        📄 Final Report
+        <span class="badge" id="report-status-badge"></span>
+      </div>
+      <div id="report-actions" style="margin-bottom:12px;display:none;">
+        <a class="btn btn-success" id="download-report-btn" target="_blank">
+          ⬇ Download Full Report (Markdown)
+        </a>
+        <a class="btn btn-success" id="download-all-screened-btn" target="_blank">⬇ All Screened Papers (CSV)</a>
+        <a class="btn btn-success" id="download-included-btn" target="_blank">⬇ Final Included Papers (CSV)</a>
+        <a class="btn btn-success" id="download-excluded-btn" target="_blank">⬇ Excluded Papers (CSV)</a>
+      </div>
+      <div class="report-preview" id="report-preview"></div>
+    </div>
+
+    <!-- Error display -->
+    <div id="error-display" style="display:none;"></div>
+  </div>
+
+  <script>
+    (function() {
+      // Agent definitions in workflow order
+      const AGENTS = [
+        "planner",
+        "query_generation",
+        "paper_search",
+        "paper_retrieval",
+        "deduplication",
+        "screening",
+        "data_extraction",
+        "quality_assessment",
+        "evidence_synthesis",
+        "validator",
+        "report_generation"
+      ];
+
+      const AGENT_LABELS = {
+        planner: "Planner",
+        query_generation: "Query Generation",
+        paper_search: "Paper Search",
+        paper_retrieval: "Paper Retrieval",
+        deduplication: "Deduplication",
+        screening: "Screening",
+        data_extraction: "Data Extraction",
+        quality_assessment: "Quality Assessment",
+        evidence_synthesis: "Evidence Synthesis",
+        validator: "Validator",
+        report_generation: "Report Generation"
+      };
+
+      const AGENT_ICONS = {
+        planner: "📋",
+        query_generation: "🔍",
+        paper_search: "🌐",
+        paper_retrieval: "📥",
+        deduplication: "🔄",
+        screening: "🔎",
+        data_extraction: "📝",
+        quality_assessment: "📊",
+        evidence_synthesis: "🧠",
+        validator: "✅",
+        report_generation: "📄"
+      };
+
+      // DOM refs
+      const form = document.getElementById('research-form');
+      const topicEl = document.getElementById('topic');
+      const paperLimitEl = document.getElementById('paper-limit');
+      const targetIncludedPapersEl = document.getElementById('target-included-papers');
+      const inclusionEl = document.getElementById('inclusion');
+      const exclusionEl = document.getElementById('exclusion');
+      const startBtn = document.getElementById('start-btn');
+      const formCard = document.getElementById('form-card');
+      const progressCard = document.getElementById('progress-card');
+      const statsCard = document.getElementById('stats-card');
+      const qaCard = document.getElementById('qa-card');
+      const synthesisCard = document.getElementById('synthesis-card');
+      const reportCard = document.getElementById('report-card');
+      const errorDisplay = document.getElementById('error-display');
+      const statusBar = document.getElementById('status-bar');
+      const statusText = document.getElementById('status-text');
+      const progressFill = document.getElementById('progress-fill');
+      const progressCompleted = document.getElementById('progress-completed');
+      const progressTotal = document.getElementById('progress-total');
+      const agentList = document.getElementById('agent-list');
+      const runIdLabel = document.getElementById('run-id-label');
+      const statRetrieved = document.getElementById('stat-retrieved');
+      const statScreened = document.getElementById('stat-screened');
+      const statAccepted = document.getElementById('stat-accepted');
+      const statRejected = document.getElementById('stat-rejected');
+      const qaContent = document.getElementById('qa-content');
+      const qaSummaryBadge = document.getElementById('qa-summary-badge');
+      const synthesisContent = document.getElementById('synthesis-content');
+      const reportPreview = document.getElementById('report-preview');
+      const reportActions = document.getElementById('report-actions');
+      const downloadBtn = document.getElementById('download-report-btn');
+      const downloadAllScreenedBtn = document.getElementById('download-all-screened-btn');
+      const downloadIncludedBtn = document.getElementById('download-included-btn');
+      const downloadExcludedBtn = document.getElementById('download-excluded-btn');
+      const reportStatusBadge = document.getElementById('report-status-badge');
+
+      let currentRunId = null;
+      let pollTimer = null;
+
+      // Helper: get lines from textarea
+      function getLines(el) {
+        return el.value.split('\n').map(x => x.trim()).filter(Boolean);
+      }
+
+      // Helper: format agent name
+      function formatAgentName(id) {
+        return AGENT_LABELS[id] || id.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+      }
+
+      // Build agent list UI
+      function buildAgentList() {
+        agentList.innerHTML = AGENTS.map(id => `
+          <div class="agent-row pending" data-agent="${id}">
+            <div class="agent-icon">${AGENT_ICONS[id] || '○'}</div>
+            <span class="agent-name">${formatAgentName(id)}</span>
+            <span class="agent-status">Pending</span>
+          </div>
+        `).join('');
+      }
+      buildAgentList();
+
+      // Update agent statuses
+      function updateAgents(completed, current, failed) {
+        const failedSet = new Set(failed || []);
+        const completedSet = new Set(completed || []);
+        AGENTS.forEach(id => {
+          const row = agentList.querySelector(`[data-agent="${id}"]`);
+          if (!row) return;
+          const statusEl = row.querySelector('.agent-status');
+          row.className = 'agent-row';
+          if (failedSet.has(id)) {
+            row.classList.add('failed');
+            statusEl.textContent = 'Failed';
+          } else if (completedSet.has(id)) {
+            row.classList.add('completed');
+            statusEl.textContent = 'Completed ✓';
+          } else if (id === current) {
+            row.classList.add('running');
+            statusEl.textContent = 'Running...';
+          } else {
+            row.classList.add('pending');
+            statusEl.textContent = 'Pending';
+          }
+        });
+      }
+
+      // Update progress bar
+      function updateProgress(completed, total) {
+        const done = completed || 0;
+        const all = total || AGENTS.length;
+        const pct = all > 0 ? Math.round((done / all) * 100) : 0;
+        progressFill.style.width = pct + '%';
+        progressCompleted.textContent = done;
+        progressTotal.textContent = all;
+      }
+
+      // Update stats
+      function updateStats(state) {
+        const searchResults = state.search_results || [];
+        const screeningResults = state.screening_results || [];
+        const accepted = screeningResults.filter(r =>
+          (r.Decision || r.decision || '').toUpperCase() === 'KEEP'
+        ).length;
+        const rejected = screeningResults.filter(r =>
+          (r.Decision || r.decision || '').toUpperCase() === 'REJECT'
+        ).length;
+
+        statRetrieved.textContent = searchResults.length;
+        statScreened.textContent = screeningResults.length;
+        statAccepted.textContent = accepted;
+        statRejected.textContent = rejected;
+
+        if (searchResults.length > 0 || screeningResults.length > 0) {
+          statsCard.style.display = 'block';
+        }
+      }
+
+      // Update QA section
+      function updateQA(state) {
+        const assessments = state.quality_assessments || [];
+        const summary = state.quality_summary || {};
+
+        if (assessments.length === 0) {
+          qaCard.style.display = 'none';
+          return;
+        }
+
+        qaCard.style.display = 'block';
+        const avgScore = summary.average_quality_score || 0;
+        qaSummaryBadge.textContent = `Avg: ${avgScore.toFixed(1)}/5 | ${assessments.length} papers`;
+
+        let html = `
+          <div class="stats-grid" style="margin-bottom:16px;">
+            <div class="stat-card"><div class="stat-value">${summary.high_quality_count || 0}</div><div class="stat-label">High Quality (4-5)</div></div>
+            <div class="stat-card"><div class="stat-value">${summary.moderate_quality_count || 0}</div><div class="stat-label">Moderate (2-4)</div></div>
+            <div class="stat-card"><div class="stat-value">${summary.low_quality_count || 0}</div><div class="stat-label">Low (1-2)</div></div>
+            <div class="stat-card"><div class="stat-value">${avgScore.toFixed(1)}</div><div class="stat-label">Average Score</div></div>
+          </div>
+          <div style="overflow-x:auto;">
+            <table class="qa-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Study</th>
+                  <th>Methodology</th>
+                  <th>Data Sources</th>
+                  <th>Limitations</th>
+                  <th>Relevance</th>
+                  <th>Score</th>
+                </tr>
+              </thead>
+              <tbody>
+        `;
+
+        assessments.forEach((a, i) => {
+          const scoreStr = String(a.overall_quality_score || '');
+          let scoreNum = 0;
+          try { scoreNum = parseFloat(scoreStr.split('/')[0].trim()); } catch(e) {}
+          const scoreClass = scoreNum >= 4 ? 'score-high' : scoreNum >= 2 ? 'score-moderate' : 'score-low';
+          html += `
+            <tr>
+              <td>${i + 1}</td>
+              <td><strong>${a.title || 'Untitled'}</strong></td>
+              <td>${a.methodology_rigor || 'N/A'}</td>
+              <td>${a.data_sources_quality || 'N/A'}</td>
+              <td>${a.limitations_acknowledged || 'N/A'}</td>
+              <td>${a.relevance_to_research || 'N/A'}</td>
+              <td><span class="score-badge ${scoreClass}">${scoreStr}</span></td>
+            </tr>
+          `;
+        });
+
+        html += '</tbody></table></div>';
+        qaContent.innerHTML = html;
+      }
+
+      // Update synthesis section
+      function updateSynthesis(state) {
+        const synthesis = state.synthesis || {};
+
+        const hasContent = synthesis.executive_summary ||
+          (synthesis.key_themes && synthesis.key_themes.length > 0) ||
+          (synthesis.research_gaps && synthesis.research_gaps.length > 0) ||
+          (synthesis.future_work && synthesis.future_work.length > 0);
+
+        if (!hasContent) {
+          synthesisCard.style.display = 'none';
+          return;
+        }
+
+        synthesisCard.style.display = 'block';
+
+        let html = '';
+
+        if (synthesis.executive_summary) {
+          html += `
+            <div class="synthesis-section">
+              <h4>📌 Executive Summary</h4>
+              <p>${synthesis.executive_summary}</p>
+            </div>
+          `;
+        }
+
+        if (synthesis.key_themes && synthesis.key_themes.length > 0) {
+          html += `
+            <div class="synthesis-section">
+              <h4>🎯 Key Themes</h4>
+              <ul>${synthesis.key_themes.map(t => `<li>${t}</li>`).join('')}</ul>
+            </div>
+          `;
+        }
+
+        if (synthesis.research_gaps && synthesis.research_gaps.length > 0) {
+          html += `
+            <div class="synthesis-section">
+              <h4>🔍 Research Gaps</h4>
+              <ul>${synthesis.research_gaps.map(g => `<li>${g}</li>`).join('')}</ul>
+            </div>
+          `;
+        }
+
+        if (synthesis.future_work && synthesis.future_work.length > 0) {
+          html += `
+            <div class="synthesis-section">
+              <h4>🚀 Future Work</h4>
+              <ul>${synthesis.future_work.map(f => `<li>${f}</li>`).join('')}</ul>
+            </div>
+          `;
+        }
+
+        synthesisContent.innerHTML = html;
+      }
+
+      // Update report section
+      function updateReport(state) {
+        const artifacts = state.artifacts || {};
+        const report = artifacts.report || {};
+        const markdown = report.markdown || '';
+
+        if (!markdown) {
+          reportCard.style.display = 'none';
+          return;
+        }
+
+        reportCard.style.display = 'block';
+        reportPreview.textContent = markdown;
+        reportActions.style.display = 'block';
+        downloadBtn.href = `/api/v1/research-runs/${currentRunId}/report`;
+        const exports = artifacts.csv_exports || {};
+        downloadAllScreenedBtn.href = exports.all_screened?.download_url || '#';
+        downloadIncludedBtn.href = exports.included?.download_url || '#';
+        downloadExcludedBtn.href = exports.excluded?.download_url || '#';
+        reportStatusBadge.textContent = 'Ready';
+      }
+
+      // Set status bar
+      function setStatus(lifecycle, message) {
+        statusBar.className = 'ready';
+        const statusMap = {
+          'CREATED': 'ready',
+          'PLANNING': 'running',
+          'QUERY_GENERATION': 'running',
+          'SEARCHING': 'running',
+          'PAPER_RETRIEVAL': 'running',
+          'DEDUPLICATION': 'running',
+          'SCREENING': 'running',
+          'DATA_EXTRACTION': 'running',
+          'QUALITY_ASSESSMENT': 'running',
+          'SYNTHESIS': 'running',
+          'REPORT_GENERATION': 'running',
+          'COMPLETED': 'completed',
+          'FAILED': 'failed',
+          'PAUSED': 'ready'
+        };
+        const cls = statusMap[lifecycle] || 'ready';
+        statusBar.classList.add(cls);
+        statusText.textContent = message || lifecycle || 'Ready';
+      }
+
+      // Show error
+      function showError(msg) {
+        errorDisplay.style.display = 'block';
+        errorDisplay.innerHTML = `<div class="error-box">❌ ${msg}</div>`;
+      }
+
+      function clearError() {
+        errorDisplay.style.display = 'none';
+        errorDisplay.innerHTML = '';
+      }
+
+      // Poll workflow state
+      async function poll(runId) {
+        try {
+          const response = await fetch(`/api/v1/research-runs/${runId}`);
+          if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: Unable to load workflow status`);
+          }
+          const state = await response.json();
+
+          const lifecycle = state.lifecycle || 'CREATED';
+          const completed = state.completed_agents || [];
+          const nextAgent = state.next_agent;
+          const errors = state.errors || [];
+
+          // Collect failed agents from errors
+          const failedAgents = errors.map(e => e.agent).filter(Boolean);
+
+          // Update UI
+          setStatus(lifecycle, `Status: ${lifecycle.replace(/_/g, ' ').toLowerCase()}`);
+          updateAgents(completed, nextAgent, failedAgents);
+          updateProgress(completed.length, AGENTS.length);
+          updateStats(state);
+          updateQA(state);
+          updateSynthesis(state);
+          updateReport(state);
+
+          // Check for errors
+          if (errors.length > 0) {
+            const lastError = errors[errors.length - 1];
+            showError(`Agent "${lastError.agent}" failed: ${lastError.message}`);
+          } else {
+            clearError();
+          }
+
+          // Stop polling on terminal states
+          if (lifecycle === 'COMPLETED' || lifecycle === 'FAILED') {
+            if (pollTimer) {
+              clearTimeout(pollTimer);
+              pollTimer = null;
+            }
+            if (lifecycle === 'COMPLETED') {
+              startBtn.disabled = false;
+              startBtn.textContent = '🚀 Start New Review';
+            } else {
+              startBtn.disabled = false;
+              startBtn.textContent = '🔄 Retry';
+            }
+            return;
+          }
+
+          // Continue polling
+          pollTimer = setTimeout(() => poll(runId), 1500);
+
+        } catch (err) {
+          if (pollTimer) {
+            clearTimeout(pollTimer);
+            pollTimer = null;
+          }
+          showError(err.message);
+          setStatus('FAILED', 'Connection error');
+          startBtn.disabled = false;
+          startBtn.textContent = '🔄 Retry';
+        }
+      }
+
+      // Start workflow
+      async function startWorkflow(topic, inclusion, exclusion, paperLimit, targetIncludedPapers) {
+        clearError();
+        startBtn.disabled = true;
+        startBtn.textContent = '⏳ Starting...';
+
+        // Reset UI
+        progressCard.style.display = 'block';
+        statsCard.style.display = 'none';
+        qaCard.style.display = 'none';
+        synthesisCard.style.display = 'none';
+        reportCard.style.display = 'none';
+        reportActions.style.display = 'none';
+        reportPreview.textContent = '';
+        updateAgents([], null, []);
+        updateProgress(0, AGENTS.length);
+        setStatus('CREATED', 'Starting workflow...');
+
+        try {
+          const response = await fetch('/api/v1/research-runs', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              topic: topic,
+              inclusion_criteria: inclusion,
+              exclusion_criteria: exclusion,
+              paper_limit: paperLimit,
+              target_included_papers: targetIncludedPapers
+            })
+          });
+
+          if (!response.ok) {
+            const errData = await response.json().catch(() => ({}));
+            throw new Error(errData.detail || `HTTP ${response.status}: Unable to start workflow`);
+          }
+
+          const run = await response.json();
+          currentRunId = run.run_id;
+          runIdLabel.textContent = `Run: ${run.run_id.slice(0, 8)}...`;
+
+          // Start polling
+          poll(run.run_id);
+
+        } catch (err) {
+          showError(err.message);
+          setStatus('FAILED', 'Failed to start');
+          startBtn.disabled = false;
+          startBtn.textContent = '🔄 Retry';
+        }
+      }
+
+      // Form submit handler
+      form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+
+        const topic = topicEl.value.trim();
+        if (!topic || topic.length < 3) {
+          showError('Please enter a research topic (at least 3 characters).');
+          return;
+        }
+
+        const inclusion = getLines(inclusionEl);
+        const exclusion = getLines(exclusionEl);
+        const paperLimit = Number(paperLimitEl.value);
+        const targetIncludedPapers = Number(targetIncludedPapersEl.value);
+
+        // Cancel any existing poll
+        if (pollTimer) {
+          clearTimeout(pollTimer);
+          pollTimer = null;
+        }
+
+        await startWorkflow(topic, inclusion, exclusion, paperLimit, targetIncludedPapers);
+      });
+
+      // Allow Enter to submit from textarea
+      topicEl.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+          e.preventDefault();
+          form.dispatchEvent(new Event('submit'));
+        }
+      });
+
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,22 @@
+# Environment
+.env
+env/
+venv/
+
+# Python
+__pycache__/
+*.pyc
+
+# Datasets
+uploads/
+*.csv
+
+# Generated outputs
+outputs/
+
+# OS
+.DS_Store
+Thumbs.db.tmp_model_judge_test/
+
+.tmp_model_judge_test/
+.tmp_model_judge_test/*
