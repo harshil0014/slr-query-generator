@@ -66,12 +66,14 @@ def export_review_csvs(state: dict[str, Any]) -> dict[str, dict[str, str | int]]
     }
     rows = [_row(paper, index, state, contributions) for index, paper in enumerate(state.get("screening_results", []), start=1)]
     included = [row for row in rows if row["Decision"].upper() == "KEEP"]
-    excluded = [row for row in rows if row["Decision"].upper() != "KEEP"]
+    excluded = [row for row in rows if row["Decision"].upper() == "REJECT"]
+    maybe = [row for row in rows if row["Decision"].upper() == "MAYBE"]
     directory = Path("outputs") / "autonomous_reviews" / run_id
     files = {
         "all_screened": ("all_screened_papers.csv", rows),
         "included": ("final_included_papers.csv", included),
         "excluded": ("excluded_papers.csv", excluded),
+        "manual_review": ("manual_review_papers.csv", maybe),
     }
     exports: dict[str, dict[str, str | int]] = {}
     for key, (filename, export_rows) in files.items():

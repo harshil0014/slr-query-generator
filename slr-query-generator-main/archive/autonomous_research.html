@@ -358,6 +358,7 @@
         <div class="stat-card"><div class="stat-value" id="stat-screened">-</div><div class="stat-label">Screened</div></div>
         <div class="stat-card"><div class="stat-value" id="stat-accepted">-</div><div class="stat-label">Accepted</div></div>
         <div class="stat-card"><div class="stat-value" id="stat-rejected">-</div><div class="stat-label">Rejected</div></div>
+        <div class="stat-card"><div class="stat-value" id="stat-maybe">-</div><div class="stat-label">Needs Manual Review</div></div>
       </div>
     </div>
 
@@ -393,6 +394,7 @@
         <a class="btn btn-success" id="download-all-screened-btn" target="_blank">⬇ All Screened Papers (CSV)</a>
         <a class="btn btn-success" id="download-included-btn" target="_blank">⬇ Final Included Papers (CSV)</a>
         <a class="btn btn-success" id="download-excluded-btn" target="_blank">⬇ Excluded Papers (CSV)</a>
+        <a class="btn btn-success" id="download-manual-review-btn" target="_blank">⬇ Needs Manual Review (CSV)</a>
       </div>
       <div class="report-preview" id="report-preview"></div>
     </div>
@@ -472,6 +474,7 @@
       const statScreened = document.getElementById('stat-screened');
       const statAccepted = document.getElementById('stat-accepted');
       const statRejected = document.getElementById('stat-rejected');
+      const statMaybe = document.getElementById('stat-maybe');
       const qaContent = document.getElementById('qa-content');
       const qaSummaryBadge = document.getElementById('qa-summary-badge');
       const synthesisContent = document.getElementById('synthesis-content');
@@ -481,6 +484,7 @@
       const downloadAllScreenedBtn = document.getElementById('download-all-screened-btn');
       const downloadIncludedBtn = document.getElementById('download-included-btn');
       const downloadExcludedBtn = document.getElementById('download-excluded-btn');
+      const downloadManualReviewBtn = document.getElementById('download-manual-review-btn');
       const reportStatusBadge = document.getElementById('report-status-badge');
 
       let currentRunId = null;
@@ -553,11 +557,15 @@
         const rejected = screeningResults.filter(r =>
           (r.Decision || r.decision || '').toUpperCase() === 'REJECT'
         ).length;
+        const maybe = screeningResults.filter(r =>
+          (r.Decision || r.decision || '').toUpperCase() === 'MAYBE'
+        ).length;
 
         statRetrieved.textContent = searchResults.length;
         statScreened.textContent = screeningResults.length;
         statAccepted.textContent = accepted;
         statRejected.textContent = rejected;
+        statMaybe.textContent = maybe;
 
         if (searchResults.length > 0 || screeningResults.length > 0) {
           statsCard.style.display = 'block';
@@ -699,6 +707,7 @@
         downloadAllScreenedBtn.href = exports.all_screened?.download_url || '#';
         downloadIncludedBtn.href = exports.included?.download_url || '#';
         downloadExcludedBtn.href = exports.excluded?.download_url || '#';
+        downloadManualReviewBtn.href = exports.manual_review?.download_url || '#';
         reportStatusBadge.textContent = 'Ready';
       }
 
